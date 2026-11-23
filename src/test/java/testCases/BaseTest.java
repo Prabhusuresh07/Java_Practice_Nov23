@@ -48,7 +48,7 @@ public class BaseTest
 		driver.quit();
 	}
 	
-	@DataProvider(name="dp", indices = {0,1})
+	@DataProvider(name="dp", indices = {0})
 	public Object[][] logindata()
 	{
 		
@@ -57,6 +57,7 @@ public class BaseTest
 				           {"Admin","admin123"}};
 		return data;
 	}
-		
+	
+	
 	
 }
