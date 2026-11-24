@@ -6,7 +6,7 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                echo 'Source code checkout completed'
+                echo 'Source code checkout completed - 1'
             }
         }
 
