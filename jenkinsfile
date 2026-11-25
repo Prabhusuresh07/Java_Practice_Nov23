@@ -3,7 +3,6 @@ pipeline {
     agent any
 
     stages {
-
         stage('Checkout') {
             steps {
                 echo 'Checking out source code'
@@ -37,17 +36,35 @@ pipeline {
 
     post {
         always {
-            echo 'Pipeline execution completed'
+            script {
+                def latestReport = powershell(
+                    returnStdout: true,
+                    script: '''
+                        $file = Get-ChildItem "reports/ExtentReport_*.html" -File |
+                                Sort-Object LastWriteTime -Descending |
+                                Select-Object -First 1
 
-            // Publish Extent HTML Report
-            publishHTML(target: [
-                reportName: 'Extent Reports',
-                reportDir: 'reports',
-                reportFiles: 'ExtentReport_*.html',
-                keepAll: true,
-                alwaysLinkToLastBuild: true,
-                allowMissing: true
-            ])
+                        if ($null -ne $file) {
+                            Write-Output $file.Name
+                        }
+                    '''
+                ).trim()
+
+                if (latestReport) {
+                    echo "Latest Extent Report: ${latestReport}"
+
+                    publishHTML(target: [
+                        reportName: 'Extent Reports',
+                        reportDir: 'reports',
+                        reportFiles: latestReport,
+                        keepAll: false,
+                        alwaysLinkToLastBuild: true,
+                        allowMissing: true
+                    ])
+                } else {
+                    echo 'No Extent HTML report found.'
+                }
+            }
 
             archiveArtifacts artifacts: 'reports/**,screenshots/**',
                              allowEmptyArchive: true
@@ -62,4 +79,3 @@ pipeline {
         }
     }
 }
-
